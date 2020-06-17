@@ -28,7 +28,7 @@ from celery import Celery
 from celery import states as celery_states
 
 from airflow import configuration
-from airflow.stats import Stats
+from airflow.settings import Stats
 from airflow.config_templates.default_celery import DEFAULT_CELERY_CONFIG
 from airflow.exceptions import AirflowException
 from airflow.executors.base_executor import BaseExecutor
