@@ -28,6 +28,7 @@ from celery import Celery
 from celery import states as celery_states
 
 from airflow import configuration
+from airflow.stats import Stats
 from airflow.config_templates.default_celery import DEFAULT_CELERY_CONFIG
 from airflow.exceptions import AirflowException
 from airflow.executors.base_executor import BaseExecutor
@@ -182,9 +183,16 @@ class CeleryExecutor(BaseExecutor):
         else:
             open_slots = self.parallelism - len(self.running)
 
-        self.log.debug("%s running task instances", len(self.running))
-        self.log.debug("%s in queue", len(self.queued_tasks))
+        num_running_tasks = len(self.running)
+        num_queued_tasks = len(self.queued_tasks)
+
+        self.log.debug("%s running task instances", num_running_tasks)
+        self.log.debug("%s in queue", num_queued_tasks)
         self.log.debug("%s open slots", open_slots)
+
+        Stats.gauge('executor.open_slots', open_slots)
+        Stats.gauge('executor.queued_tasks', num_queued_tasks)
+        Stats.gauge('executor.running_tasks', num_running_tasks)
 
         sorted_queue = sorted(
             [(k, v) for k, v in self.queued_tasks.items()],
